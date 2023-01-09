@@ -1,5 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from views import get_all_topics, get_all_letters, get_all_lettertopics, get_all_pals, create_letter, create_lettertopics
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server
@@ -32,23 +33,20 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL and capture the tuple that is returned
         (resource, id) = self.parse_url(self.path)
 
-        if resource == "metals":
-            if id is None:
-                response = get_all_metals()
-            else:
-                response = get_single_metal(id)
-        elif resource == "sizes":
-            if id is None:
-                response = get_all_sizes()
-            else:
-                response = get_single_size(id)
+        if resource == "pals":
+            response = get_all_pals()
+        elif resource == "letters":
+            response = get_all_letters()
+        elif resource == "lettertopics":
+            response = get_all_lettertopics()
+        elif resource == "topics":
+            response = get_all_topics()
 
         self.wfile.write(json.dumps(response).encode())
 
     def do_POST(self):
         """Handles POST requests to the server """
         self._set_headers(201)
-
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
 
@@ -59,29 +57,16 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
 
         # Initialize new things
-        new_order = None
+        new_letter_thing = None
 
-        if resource == "orders":
-            # new_order = create_order(post_body)
-            # Encode the new order and send in response
-            self.wfile.write(json.dumps(new_order).encode())
+        if resource == "letters":
+            new_letter_thing = create_letter(post_body)
+            self.wfile.write(json.dumps(new_letter_thing).encode())
 
-    def do_PUT(self):
-        """Handles PUT requests to the server """
-        self._set_headers(204)
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len)
-        post_body = json.loads(post_body)
+        if resource == "lettertopics":
+            new_letter_thing = create_lettertopics(post_body)
+            self.wfile.write(json.dumps(new_letter_thing).encode())
 
-        # Parse the URL
-        (resource, id) = self.parse_url(self.path)
-
-        # Update a single order from the list
-        if resource == "orders":
-            # update_order(id, post_body)
-
-        # Encode the new item and send in response
-        self.wfile.write("".encode())
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin
@@ -109,13 +94,13 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_DELETE(self):
         """handles DELETE requests"""
         # Set a 204 response code
-        self._set_headers(204)
+        # self._set_headers(204)
 
         # Parse the URL
-        (resource, id) = self.parse_url(self.path)
+        # (resource, id) = self.parse_url(self.path)
 
         # Delete a single entry from the respective list
-        if resource == "orders":
+        # if resource == "orders":
             # delete_order(id)
 
         # Encode the new thing and send in response
